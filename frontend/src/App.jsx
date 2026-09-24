@@ -6,6 +6,8 @@ import { NumberField, OptionPicker } from './components/Fields.jsx'
 import ResultPanel from './components/ResultPanel.jsx'
 import ModelInfoPanel from './components/ModelInfoPanel.jsx'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 const STEPS = [{ lead: 'Lead I', label: 'Personal' }, { lead: 'Lead II', label: 'Vitals' }, { lead: 'Lead III', label: 'Labs' }, { lead: 'Lead V', label: 'Lifestyle' }]
 const initialForm = { age_years: 45, gender: 2, height: 170, weight: 75, ap_hi: 120, ap_lo: 80, cholesterol: 1, gluc: 1, smoke: 0, alco: 0, active: 1 }
 
@@ -150,7 +152,7 @@ function StepCard({ number, title, text, delay }) { return <div className="group
 
 function AboutPage() { 
   const [metrics, setMetrics] = useState(null); 
-  useEffect(() => { fetch('/api/model-info').then((r) => r.json()).then(setMetrics).catch(() => {}) }, []); 
+  useEffect(() => { fetch(`${API_URL}/api/model-info`).then((r) => r.json()).then(setMetrics).catch(() => {}) }, []); 
   const factors = [['Blood pressure', 'High blood pressure can place extra strain on the heart and blood vessels, leading to long-term complications if unmanaged.'], ['Cholesterol & glucose', 'These laboratory measures can be important markers to discuss with your clinician to assess metabolic health.'], ['Movement & habits', 'Physical activity, tobacco use, and alcohol intake all help shape overall risk and represent actionable areas for change.'], ['Age & body measures', 'Age, height, and weight provide context for the rest of the picture and help tailor the risk profile.']]; 
   
   return (
@@ -218,7 +220,7 @@ function AboutPage() {
 function AssessmentPage() { 
   const [step, setStep] = useState(0), [form, setForm] = useState(initialForm), [result, setResult] = useState(null), [loading, setLoading] = useState(false), [error, setError] = useState(null); 
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value })); 
-  const submit = useCallback(async () => { setLoading(true); setError(null); try { const res = await fetch('/api/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }); if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body.detail || 'Prediction failed. Is the API running on port 8000?') }; setResult(await res.json()) } catch (e) { setError(e.message) } finally { setLoading(false) } }, [form]); 
+  const submit = useCallback(async () => { setLoading(true); setError(null); try { const res = await fetch(`${API_URL}/api/predict`, {method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }); if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body.detail || 'Prediction failed. Is the API running on port 8000?') }; setResult(await res.json()) } catch (e) { setError(e.message) } finally { setLoading(false) } }, [form]); 
   
   const stepHints = [
     "Your baseline metrics help us calibrate the model's risk baseline according to demographic risks.",
